@@ -1,0 +1,401 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model InsuranceProvider {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  website     String?
+  phone       String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  insuranceCards InsuranceCard[]
+  coverageRules  CoverageRule[]
+}
+
+model InsuranceCard {
+  id               String           @id @default(cuid())
+  patientId        String
+  providerId       String
+  cardNumber       String           @unique
+  holderName       String
+  policyNumber     String?
+  expiryDate       DateTime?
+  coverageAmount   Float
+  remainingBalance Float
+  documentUrl      String?
+  status           InsuranceStatus  @default(PENDING)
+  rejectionReason  String?
+  verifiedById     String?
+  verifiedAt       DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  // Relations
+  patient          Patient          @relation(fields: [patientId], references: [id])
+  provider         InsuranceProvider @relation(fields: [providerId], references: [id])
+  verifiedBy       User?            @relation("VerifiedInsuranceCards", fields: [verifiedById], references: [id])
+  claims           InsuranceClaim[]
+}
+
+model CoverageRule {
+  id              String    @id @default(cuid())
+  providerId      String
+  serviceName     String    // e.g., "General Consultation", "Surgery", etc.
+  coveragePercent Float     // Percentage covered (0-100)
+  maxAmount       Float?    // Maximum amount covered
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  provider        InsuranceProvider @relation(fields: [providerId], references: [id])
+}
+
+model InsuranceClaim {
+  id              String       @id @default(cuid())
+  cardId          String
+  appointmentId   String?
+  serviceName     String
+  claimedAmount   Float
+  approvedAmount  Float?
+  status          ClaimStatus  @default(PENDING)
+  rejectionReason String?
+  processedById   String?
+  processedAt     DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Relations
+  card            InsuranceCard @relation(fields: [cardId], references: [id])
+  appointment     Appointment?  @relation(fields: [appointmentId], references: [id])
+  processedBy     User?         @relation("ProcessedClaims", fields: [processedById], references: [id])
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  PATIENT
+  NURSE
+  RECEPTIONIST
+  LAB_STAFF
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  RESCHEDULED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum InsuranceStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PROCESSED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String
+  role          Role
+  phone         String?
+  address       String?
+  dateOfBirth   DateTime?
+  gender        String?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  doctor        Doctor?
+  patient       Patient?
+  staff         Staff?
+  sentMessages  Message[] @relation("SentMessages")
+  notifications Notification[]
+  verifiedInsuranceCards InsuranceCard[] @relation("VerifiedInsuranceCards")
+  processedClaims InsuranceClaim[] @relation("ProcessedClaims")
+}
+
+model Doctor {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  specialization  String
+  license         String    @unique
+  experience      Int
+  education       String
+  bio             String?
+  consultationFee Float
+  rating          Float     @default(0)
+  departmentId    String?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department      Department?      @relation(fields: [departmentId], references: [id])
+  sessions        DoctorSession[]
+  appointments    Appointment[]
+  reviews         Review[]
+  prescriptions   Prescription[]
+  medicalReports  MedicalReport[]
+  availability    DoctorAvailability[]
+  receivedMessages Message[]       @relation("DoctorMessages")
+}
+
+model Patient {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  bloodGroup        String?
+  allergies         String?
+  medicalHistory    String?
+  emergencyContact  String?
+  insurance         String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments      Appointment[]
+  payments          Payment[]
+  reviews           Review[]
+  prescriptions     Prescription[]
+  medicalReports    MedicalReport[]
+  chats             Chat[]
+  insuranceCards    InsuranceCard[]
+}
+
+model Department {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  head        String?
+  location    String?
+  phone       String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  doctors     Doctor[]
+  services    Service[]
+}
+
+model Staff {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  position    String
+  department  String?
+  salary      Float?
+  joinDate    DateTime  @default(now())
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Service {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  price         Float
+  duration      Int       // in minutes
+  departmentId  String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  department    Department? @relation(fields: [departmentId], references: [id])
+  appointments  Appointment[]
+}
+
+model DoctorSession {
+  id          String    @id @default(cuid())
+  doctorId    String
+  date        DateTime
+  startTime   String
+  endTime     String
+  maxPatients Int       @default(10)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  doctor      Doctor    @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+}
+
+model DoctorAvailability {
+  id          String    @id @default(cuid())
+  doctorId    String
+  dayOfWeek   Int       // 0 = Sunday, 6 = Saturday
+  startTime   String
+  endTime     String
+  isAvailable Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  doctor      Doctor    @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  patientId   String
+  doctorId    String
+  sessionId   String?
+  serviceId   String?
+  date        DateTime
+  time        String
+  status      AppointmentStatus @default(PENDING)
+  reason      String?
+  notes       String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  // Relations
+  patient     Patient           @relation(fields: [patientId], references: [id])
+  doctor      Doctor            @relation(fields: [doctorId], references: [id])
+  session     DoctorSession?    @relation(fields: [sessionId], references: [id])
+  service     Service?          @relation(fields: [serviceId], references: [id])
+  payment     Payment?
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  appointmentId   String        @unique
+  patientId       String
+  amount          Float
+  status          PaymentStatus @default(PENDING)
+  paymentMethod   String?
+  transactionId   String?
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  // Relations
+  appointment     Appointment   @relation(fields: [appointmentId], references: [id])
+  patient         Patient       @relation(fields: [patientId], references: [id])
+}
+
+model Prescription {
+  id          String    @id @default(cuid())
+  patientId   String
+  doctorId    String
+  medications String    // JSON array of medications
+  dosage      String?
+  instructions String?
+  validUntil  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  patient     Patient   @relation(fields: [patientId], references: [id])
+  doctor      Doctor    @relation(fields: [doctorId], references: [id])
+}
+
+model MedicalReport {
+  id          String    @id @default(cuid())
+  patientId   String
+  doctorId    String
+  title       String
+  diagnosis   String
+  treatment   String?
+  notes       String?
+  attachments String?   // JSON array of file URLs
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  patient     Patient   @relation(fields: [patientId], references: [id])
+  doctor      Doctor    @relation(fields: [doctorId], references: [id])
+}
+
+model Review {
+  id          String    @id @default(cuid())
+  patientId   String
+  doctorId    String
+  rating      Int       // 1-5
+  comment     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  patient     Patient   @relation(fields: [patientId], references: [id])
+  doctor      Doctor    @relation(fields: [doctorId], references: [id])
+}
+
+model Message {
+  id          String    @id @default(cuid())
+  senderId    String
+  recipientId String?   // null for announcements
+  subject     String?
+  content     String
+  isRead      Boolean   @default(false)
+  isAnnouncement Boolean @default(false)
+  createdAt   DateTime  @default(now())
+  
+  // Relations
+  sender      User      @relation("SentMessages", fields: [senderId], references: [id])
+  doctor      Doctor?   @relation("DoctorMessages", fields: [recipientId], references: [id])
+}
+
+model Chat {
+  id          String    @id @default(cuid())
+  patientId   String
+  doctorId    String?
+  messages    String    // JSON array of messages
+  lastMessage DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  patient     Patient   @relation(fields: [patientId], references: [id])
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  userId      String
+  title       String
+  message     String
+  type        String    // APPOINTMENT, PAYMENT, MESSAGE, etc.
+  isRead      Boolean   @default(false)
+  link        String?
+  createdAt   DateTime  @default(now())
+  
+  // Relations
+  user        User      @relation(fields: [userId], references: [id])
+}
