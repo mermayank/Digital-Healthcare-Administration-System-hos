@@ -287,11 +287,12 @@ model Appointment {
   updatedAt   DateTime          @updatedAt
   
   // Relations
-  patient     Patient           @relation(fields: [patientId], references: [id])
-  doctor      Doctor            @relation(fields: [doctorId], references: [id])
-  session     DoctorSession?    @relation(fields: [sessionId], references: [id])
-  service     Service?          @relation(fields: [serviceId], references: [id])
-  payment     Payment?
+  patient           Patient           @relation(fields: [patientId], references: [id])
+  doctor          Doctor            @relation(fields: [doctorId], references: [id])
+  session         DoctorSession?    @relation(fields: [sessionId], references: [id])
+  service         Service?          @relation(fields: [serviceId], references: [id])
+  payment         Payment?
+  insuranceClaims InsuranceClaim[]
 }
 
 model Payment {

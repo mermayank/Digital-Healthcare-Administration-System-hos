@@ -3,6 +3,28 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
+// GET /api/insurance/providers - Get insurance providers
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const isActive = searchParams.get('isActive')
+    
+    const providers = await prisma.insuranceProvider.findMany({
+      where: {
+        ...(isActive && { isActive: isActive === 'true' })
+      },
+      orderBy: {
+        name: 'asc'
+      }
+    })
+
+    return NextResponse.json({ providers })
+  } catch (error) {
+    console.error('Error fetching insurance providers:', error)
+    return NextResponse.json({ error: 'Failed to fetch insurance providers' }, { status: 500 })
+  }
+}
+
 // POST /api/insurance/providers - Create a new insurance provider
 export async function POST(request: NextRequest) {
   try {
@@ -21,23 +43,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Provider name is required' }, { status: 400 })
     }
 
-    // Since we're having issues with Prisma client, we'll return a mock response
-    // In a real application, this would interact with the database
-    
-    // Mock provider creation
-    const provider = {
-      id: `provider_${Date.now()}`,
-      name,
-      description: description || '',
-      website: website || '',
-      phone: phone || '',
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-    
-    // Simulate a delay for database operation
-    await new Promise(resolve => setTimeout(resolve, 500))
+    const provider = await prisma.insuranceProvider.create({
+      data: {
+        name,
+        description: description || null,
+        website: website || null,
+        phone: phone || null
+      }
+    })
 
     return NextResponse.json({ 
       message: 'Insurance provider created successfully',
