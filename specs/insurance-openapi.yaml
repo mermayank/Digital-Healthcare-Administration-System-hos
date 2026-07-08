@@ -30,6 +30,19 @@ paths:
                   value:
                     status: "ok"
                     timestamp: "2024-01-01T00:00:00Z"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  timestamp:
+                    type: string
+                    format: date-time
   /providers:
     get:
       summary: Get insurance providers
@@ -57,8 +70,12 @@ paths:
               examples:
                 default:
                   $ref: "#/components/examples/GetProvidersSuccess"
-                external:
-                  externalValue: "./examples/providers/get-providers-200.json"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "500":
           description: Internal Server Error
           content:
@@ -93,7 +110,11 @@ paths:
                   name: "ICICI Lombard"
               full:
                 summary: Full request with all fields
-                externalValue: "./examples/providers/post-provider-request.json"
+                value:
+                  name: "Star Health"
+                  description: "Private health insurance provider"
+                  website: "https://starhealth.in"
+                  phone: "1800-425-2255"
       responses:
         "201":
           description: Created
@@ -109,8 +130,6 @@ paths:
               examples:
                 success:
                   $ref: "#/components/examples/CreateProviderSuccess"
-                external:
-                  externalValue: "./examples/providers/post-provider-201.json"
         "400":
           description: Bad Request
           content:
@@ -433,6 +452,12 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/CoverageRule"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "500":
           description: Internal Server Error
           content:

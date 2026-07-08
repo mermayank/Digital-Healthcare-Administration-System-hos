@@ -9,6 +9,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const providerId = searchParams.get('providerId')
     const isActive = searchParams.get('isActive')
+
+    // Validate isActive is either "true" or "false" if provided
+    if (isActive && isActive !== 'true' && isActive !== 'false') {
+      return NextResponse.json({ error: 'Invalid isActive parameter. Must be "true" or "false".' }, { status: 400 })
+    }
     
     const rules = await prisma.coverageRule.findMany({
       where: {
