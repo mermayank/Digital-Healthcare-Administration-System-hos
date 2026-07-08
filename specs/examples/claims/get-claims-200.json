@@ -1,0 +1,18 @@
+{
+  "claims": [
+    {
+      "id": "claim1",
+      "cardId": "card1",
+      "appointmentId": null,
+      "serviceName": "General Consultation",
+      "claimedAmount": 500,
+      "approvedAmount": null,
+      "status": "PENDING",
+      "rejectionReason": null,
+      "processedById": null,
+      "processedAt": null,
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    }
+  ]
+}

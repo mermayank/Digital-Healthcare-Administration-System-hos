@@ -1,0 +1,19 @@
+{
+  "cards": [
+    {
+      "id": "card1",
+      "patientId": "patient1",
+      "providerId": "prov1",
+      "cardNumber": "AB1234567890",
+      "holderName": "John Doe",
+      "policyNumber": "POL123456",
+      "expiryDate": "2025-12-31T00:00:00Z",
+      "coverageAmount": 500000,
+      "remainingBalance": 450000,
+      "documentUrl": "/uploads/card1.jpg",
+      "status": "APPROVED",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    }
+  ]
+}

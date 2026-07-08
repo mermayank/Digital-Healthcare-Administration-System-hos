@@ -6,6 +6,30 @@ info:
 servers:
   - url: http://localhost:3000/api/insurance
 paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      tags:
+        - Health
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  timestamp:
+                    type: string
+                    format: date-time
+              examples:
+                healthy:
+                  value:
+                    status: "ok"
+                    timestamp: "2024-01-01T00:00:00Z"
   /providers:
     get:
       summary: Get insurance providers
@@ -32,16 +56,9 @@ paths:
                       $ref: "#/components/schemas/InsuranceProvider"
               examples:
                 default:
-                  value:
-                    providers:
-                      - id: "prov1"
-                        name: "Ayushman Bharat"
-                        description: "National health insurance scheme"
-                        website: "https://ayushmanbharat.gov.in"
-                        phone: "1800-102-7102"
-                        isActive: true
-                        createdAt: "2024-01-01T00:00:00Z"
-                        updatedAt: "2024-01-01T00:00:00Z"
+                  $ref: "#/components/examples/GetProvidersSuccess"
+                external:
+                  externalValue: "./examples/providers/get-providers-200.json"
         "500":
           description: Internal Server Error
           content:
@@ -70,12 +87,13 @@ paths:
                 phone:
                   type: string
             examples:
-              default:
+              minimal:
+                summary: Minimal request with only required fields
                 value:
-                  name: "Star Health"
-                  description: "Private health insurance"
-                  website: "https://starhealth.in"
-                  phone: "1800-425-2255"
+                  name: "ICICI Lombard"
+              full:
+                summary: Full request with all fields
+                externalValue: "./examples/providers/post-provider-request.json"
       responses:
         "201":
           description: Created
@@ -89,18 +107,10 @@ paths:
                   provider:
                     $ref: "#/components/schemas/InsuranceProvider"
               examples:
-                default:
-                  value:
-                    message: "Insurance provider created successfully"
-                    provider:
-                      id: "prov2"
-                      name: "Star Health"
-                      description: "Private health insurance"
-                      website: "https://starhealth.in"
-                      phone: "1800-425-2255"
-                      isActive: true
-                      createdAt: "2024-01-01T00:00:00Z"
-                      updatedAt: "2024-01-01T00:00:00Z"
+                success:
+                  $ref: "#/components/examples/CreateProviderSuccess"
+                external:
+                  externalValue: "./examples/providers/post-provider-201.json"
         "400":
           description: Bad Request
           content:
@@ -816,6 +826,38 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 components:
+  examples:
+    GetProvidersSuccess:
+      value:
+        providers:
+          - id: "prov1"
+            name: "Ayushman Bharat"
+            description: "National health insurance scheme"
+            website: "https://ayushmanbharat.gov.in"
+            phone: "1800-102-7102"
+            isActive: true
+            createdAt: "2024-01-01T00:00:00Z"
+            updatedAt: "2024-01-01T00:00:00Z"
+          - id: "prov2"
+            name: "Star Health"
+            description: "Private health insurance"
+            website: "https://starhealth.in"
+            phone: "1800-425-2255"
+            isActive: true
+            createdAt: "2024-01-02T00:00:00Z"
+            updatedAt: "2024-01-02T00:00:00Z"
+    CreateProviderSuccess:
+      value:
+        message: "Insurance provider created successfully"
+        provider:
+          id: "prov3"
+          name: "HDFC Ergo"
+          description: "Leading general insurance company"
+          website: "https://hdfcergo.com"
+          phone: "1800-266-9777"
+          isActive: true
+          createdAt: "2024-01-03T00:00:00Z"
+          updatedAt: "2024-01-03T00:00:00Z"
   schemas:
     Error:
       type: object

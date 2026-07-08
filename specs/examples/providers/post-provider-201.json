@@ -1,0 +1,13 @@
+{
+  "message": "Insurance provider created successfully",
+  "provider": {
+    "id": "prov3",
+    "name": "HDFC Ergo",
+    "description": "Leading general insurance company",
+    "website": "https://hdfcergo.com",
+    "phone": "1800-266-9777",
+    "isActive": true,
+    "createdAt": "2024-01-03T00:00:00Z",
+    "updatedAt": "2024-01-03T00:00:00Z"
+  }
+}
