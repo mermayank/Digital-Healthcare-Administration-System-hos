@@ -71,7 +71,12 @@ export async function PUT(
       return NextResponse.json({ error: 'Insurance card not found' }, { status: 404 })
     }
 
-    const body = await request.json()
+    let body
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+    }
     
     // If patient is updating their own card
     if (session.user.role === 'PATIENT') {

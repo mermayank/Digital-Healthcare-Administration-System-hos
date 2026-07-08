@@ -95,8 +95,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    let body
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+    }
     const { cardId, appointmentId, serviceName, claimedAmount } = body
+
+    // Validate required fields
+    if (!cardId || !serviceName || claimedAmount === undefined || claimedAmount === null) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    // Validate claimedAmount is a number
+    const parsedClaimedAmount = Number(claimedAmount)
+    if (isNaN(parsedClaimedAmount)) {
+      return NextResponse.json({ error: 'Invalid claimed amount' }, { status: 400 })
+    }
 
     // Validate card exists and belongs to patient (if patient)
     const card = await prisma.insuranceCard.findUnique({
@@ -137,7 +153,7 @@ export async function POST(request: NextRequest) {
         cardId,
         ...(appointmentId && { appointmentId }),
         serviceName,
-        claimedAmount: parseFloat(claimedAmount)
+        claimedAmount: parsedClaimedAmount
       }
     })
 

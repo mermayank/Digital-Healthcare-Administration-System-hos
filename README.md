@@ -62,6 +62,19 @@ We use Specmatic for contract testing against the OpenAPI specification.
     npm run test:contract
     ```
 
+### Resiliency Testing with Specmatic
+We use Specmatic's generative testing to fuzz the API and check for graceful handling of invalid inputs, ensuring that the API returns appropriate error codes (like 400 Bad Request) instead of crashing or returning 500 Internal Server Error.
+
+#### Running Resiliency Tests
+1. Start the dev server:
+    ```bash
+    npm run dev
+    ```
+2. In a separate terminal, run the resiliency tests:
+    ```bash
+    npm run test:resiliency
+    ```
+
 ## CI/CD
 GitHub Actions runs two jobs on every push/pull request:
 1. `contract-tests`: Runs Specmatic contract tests

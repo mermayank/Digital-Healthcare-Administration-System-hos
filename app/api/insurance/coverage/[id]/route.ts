@@ -47,15 +47,20 @@ export async function PUT(
       return NextResponse.json({ error: 'Coverage rule not found' }, { status: 404 })
     }
 
-    const body = await request.json()
+    let body
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+    }
     const { serviceName, coveragePercent, maxAmount, isActive } = body
 
     const updatedRule = await prisma.coverageRule.update({
       where: { id: params.id },
       data: {
         ...(serviceName && { serviceName }),
-        ...(coveragePercent !== undefined && { coveragePercent: parseFloat(coveragePercent) }),
-        ...(maxAmount !== undefined && { maxAmount: maxAmount ? parseFloat(maxAmount) : null }),
+        ...(coveragePercent !== undefined && coveragePercent !== null && { coveragePercent: Number(coveragePercent) }),
+        ...(maxAmount !== undefined && { maxAmount: maxAmount !== null ? Number(maxAmount) : null }),
         ...(isActive !== undefined && { isActive: isActive === 'true' || isActive === true })
       },
       include: {

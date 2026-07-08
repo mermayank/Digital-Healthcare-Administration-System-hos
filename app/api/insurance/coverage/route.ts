@@ -39,8 +39,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    let body
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+    }
     const { providerId, serviceName, coveragePercent, maxAmount } = body
+
+    // Validate required fields
+    if (!providerId || !serviceName || coveragePercent === undefined || coveragePercent === null) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    // Validate coveragePercent is a number
+    const parsedCoveragePercent = Number(coveragePercent)
+    if (isNaN(parsedCoveragePercent)) {
+      return NextResponse.json({ error: 'Invalid coverage percent' }, { status: 400 })
+    }
 
     // Validate provider exists
     const provider = await prisma.insuranceProvider.findUnique({
@@ -55,8 +71,8 @@ export async function POST(request: NextRequest) {
       data: {
         providerId,
         serviceName,
-        coveragePercent: parseFloat(coveragePercent),
-        ...(maxAmount && { maxAmount: parseFloat(maxAmount) })
+        coveragePercent: parsedCoveragePercent,
+        ...(maxAmount !== undefined && maxAmount !== null && { maxAmount: Number(maxAmount) })
       }
     })
 

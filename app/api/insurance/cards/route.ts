@@ -16,94 +16,54 @@ export async function GET(request: NextRequest) {
     const patientId = searchParams.get('patientId')
     const status = searchParams.get('status')
 
-    // Since we're having issues with Prisma, we'll return mock data
-    // In a real application, this would interact with the database
-    
-    // Mock providers
-    const mockProviders = [
-      { id: '1', name: 'Ayushman Bharat' },
-      { id: '2', name: 'Star Health' },
-      { id: '3', name: 'HDFC Ergo' },
-      { id: '4', name: 'ICICI Lombard' },
-      { id: '5', name: 'Bajaj Allianz' }
-    ];
-    
-    // Mock cards
-    const mockCards = [
-      {
-        id: 'card1',
-        patientId: 'patient1',
-        providerId: '1',
-        cardNumber: 'AB1234567890',
-        holderName: 'John Doe',
-        policyNumber: 'POL123456',
-        expiryDate: '2025-12-31',
-        coverageAmount: 500000,
-        remainingBalance: 450000,
-        documentUrl: '',
-        status: 'APPROVED',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        provider: mockProviders[0]
-      },
-      {
-        id: 'card2',
-        patientId: 'patient1',
-        providerId: '2',
-        cardNumber: 'SH9876543210',
-        holderName: 'John Doe',
-        policyNumber: 'POL789012',
-        expiryDate: '2024-12-31',
-        coverageAmount: 300000,
-        remainingBalance: 300000,
-        documentUrl: '',
-        status: 'PENDING',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        provider: mockProviders[1]
-      }
-    ];
-
     // For patients, only show their own cards
     if (session.user.role === 'PATIENT') {
-      // Filter mock cards for the current patient
-      const patientCards = mockCards.filter(card => card.patientId === 'patient1');
-      
-      // Apply status filter if provided
-      const filteredCards = status 
-        ? patientCards.filter(card => card.status === status)
-        : patientCards;
+      const patient = await prisma.patient.findUnique({
+        where: { userId: session.user.id }
+      })
 
-      return NextResponse.json({ cards: filteredCards });
+      if (!patient) {
+        return NextResponse.json({ error: 'Patient not found' }, { status: 404 })
+      }
+
+      const cards = await prisma.insuranceCard.findMany({
+        where: {
+          patientId: patient.id,
+          ...(status && { status })
+        },
+        include: {
+          provider: true
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      })
+
+      return NextResponse.json({ cards })
     }
 
     // For admins, allow filtering by patientId
     if (session.user.role === 'ADMIN') {
-      // Apply filters
-      let filteredCards = mockCards;
-      
-      if (patientId) {
-        filteredCards = mockCards.filter(card => card.patientId === patientId);
-      }
-      
-      if (status) {
-        filteredCards = mockCards.filter(card => card.status === status);
-      }
-
-      // Add mock patient data for admin view
-      const cardsWithPatientData = filteredCards.map(card => ({
-        ...card,
-        patient: {
-          id: card.patientId,
-          user: {
-            name: 'John Doe',
-            email: 'john@example.com'
-          }
+      const cards = await prisma.insuranceCard.findMany({
+        where: {
+          ...(patientId && { patientId }),
+          ...(status && { status })
         },
-        verifiedBy: null
-      }));
+        include: {
+          patient: {
+            include: {
+              user: true
+            }
+          },
+          provider: true,
+          verifiedBy: true
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      })
 
-      return NextResponse.json({ cards: cardsWithPatientData });
+      return NextResponse.json({ cards })
     }
 
     // For other roles, deny access
@@ -123,36 +83,58 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Since we're having issues with Prisma, we'll create a mock response
-    // In a real application, this would interact with the database
-    
-    const body = await request.json()
+    let body
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+    }
     const { providerId, cardNumber, holderName, policyNumber, expiryDate, coverageAmount, documentUrl } = body
 
     // Validate required fields
-    if (!providerId || !cardNumber || !holderName || !coverageAmount) {
+    if (!providerId || !cardNumber || !holderName || coverageAmount === undefined || coverageAmount === null) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Mock card creation
-    const card = {
-      id: `card_${Date.now()}`,
-      patientId: `patient_${session.user.id}`,
-      providerId,
-      cardNumber,
-      holderName,
-      policyNumber: policyNumber || '',
-      expiryDate: expiryDate || null,
-      coverageAmount: parseFloat(coverageAmount),
-      remainingBalance: parseFloat(coverageAmount),
-      documentUrl: documentUrl || '',
-      status: 'PENDING',
-      createdAt: new Date(),
-      updatedAt: new Date()
+    // Validate coverageAmount is a number
+    const parsedCoverageAmount = Number(coverageAmount)
+    if (isNaN(parsedCoverageAmount)) {
+      return NextResponse.json({ error: 'Invalid coverage amount' }, { status: 400 })
     }
 
-    // Simulate database operation delay
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // Get patient
+    const patient = await prisma.patient.findUnique({
+      where: { userId: session.user.id }
+    })
+
+    if (!patient) {
+      return NextResponse.json({ error: 'Patient not found' }, { status: 404 })
+    }
+
+    // Validate provider exists
+    const provider = await prisma.insuranceProvider.findUnique({
+      where: { id: providerId }
+    })
+
+    if (!provider) {
+      return NextResponse.json({ error: 'Insurance provider not found' }, { status: 404 })
+    }
+
+    // Create card
+    const card = await prisma.insuranceCard.create({
+      data: {
+        patientId: patient.id,
+        providerId,
+        cardNumber,
+        holderName,
+        policyNumber: policyNumber || null,
+        expiryDate: expiryDate ? new Date(expiryDate) : null,
+        coverageAmount: parsedCoverageAmount,
+        remainingBalance: parsedCoverageAmount,
+        documentUrl: documentUrl || null,
+        status: 'PENDING'
+      }
+    })
 
     return NextResponse.json({ 
       message: 'Insurance card submitted successfully',

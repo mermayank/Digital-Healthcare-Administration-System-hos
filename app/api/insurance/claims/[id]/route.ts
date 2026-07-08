@@ -78,25 +78,35 @@ export async function PUT(
       return NextResponse.json({ error: 'Insurance claim not found' }, { status: 404 })
     }
 
-    const body = await request.json()
+    let body
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+    }
     const { status, approvedAmount, rejectionReason } = body
 
     // Calculate remaining balance if approving
     let updatedRemainingBalance = claim.card.remainingBalance
-    if (status === 'APPROVED' && approvedAmount) {
-      updatedRemainingBalance = claim.card.remainingBalance - parseFloat(approvedAmount)
+    let parsedApprovedAmount: number | undefined = undefined
+    if (status === 'APPROVED' && approvedAmount !== undefined && approvedAmount !== null) {
+      parsedApprovedAmount = Number(approvedAmount)
+      if (isNaN(parsedApprovedAmount)) {
+        return NextResponse.json({ error: 'Invalid approved amount' }, { status: 400 })
+      }
+      updatedRemainingBalance = claim.card.remainingBalance - parsedApprovedAmount
     }
 
     const updatedClaim = await prisma.insuranceClaim.update({
       where: { id: params.id },
       data: {
         status,
-        ...(approvedAmount && { approvedAmount: parseFloat(approvedAmount) }),
+        ...(parsedApprovedAmount !== undefined && { approvedAmount: parsedApprovedAmount }),
         ...(rejectionReason && { rejectionReason }),
-        ...(status === 'APPROVED' || status === 'REJECTED') && { 
+        ...((status === 'APPROVED' || status === 'REJECTED') && { 
           processedById: session.user.id, 
           processedAt: new Date() 
-        }
+        })
       },
       include: {
         card: {
@@ -115,7 +125,7 @@ export async function PUT(
     })
 
     // Update card remaining balance if claim is approved
-    if (status === 'APPROVED' && approvedAmount) {
+    if (status === 'APPROVED' && parsedApprovedAmount !== undefined) {
       await prisma.insuranceCard.update({
         where: { id: claim.cardId },
         data: {

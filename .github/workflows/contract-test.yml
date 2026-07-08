@@ -40,7 +40,7 @@ jobs:
           echo "Server failed to start!"
           exit 1
       - name: Run contract tests
-        run: npm run test:contract || true  # Temporarily allow failures until auth is set up
+        run: npm run test:contract
 
   resiliency-tests:
     runs-on: ubuntu-latest
@@ -56,6 +56,13 @@ jobs:
         run: npm ci
       - name: Set up Prisma
         run: npx prisma generate
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+      - name: Install Specmatic
+        run: npm install -g specmatic
       - name: Create .env file
         run: echo "DATABASE_URL=file:./dev.db" > .env
       - name: Run database migrations
@@ -74,13 +81,8 @@ jobs:
           done
           echo "Server failed to start!"
           exit 1
-      - name: Run resiliency checks
-        run: |
-          echo "Running resiliency checks..."
-          for i in {1..10}; do
-            curl -f http://localhost:3000/api/insurance/health
-            echo " - Check $i passed"
-            sleep 1
-          done
-          echo "All resiliency checks passed!"
+      - name: Run resiliency tests
+        run: npm run test:resiliency
+        env:
+          SPECMATIC_GENERATIVE_TESTS: "true"
 
