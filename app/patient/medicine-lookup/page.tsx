@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Search, Pill, AlertTriangle, Info, Clock, Package, User, Utensils, AlertCircle } from 'lucide-react'
@@ -32,7 +32,7 @@ interface MedicineInfo {
   usageInstructions: string[]
 }
 
-export default function MedicineLookupPage() {
+function MedicineLookupContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -364,5 +364,13 @@ export default function MedicineLookupPage() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function MedicineLookupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-lg">Loading...</div></div>}>
+      <MedicineLookupContent />
+    </Suspense>
   )
 }

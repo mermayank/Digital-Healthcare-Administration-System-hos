@@ -14,7 +14,12 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const patientId = searchParams.get('patientId')
-    const status = searchParams.get('status')
+    const status = searchParams.get('status') as 'PENDING' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | null
+
+    // Validate status if provided
+    if (status && !['PENDING', 'APPROVED', 'REJECTED', 'EXPIRED'].includes(status)) {
+      return NextResponse.json({ error: 'Invalid status parameter' }, { status: 400 })
+    }
 
     // For patients, only show their own cards
     if (session.user.role === 'PATIENT') {

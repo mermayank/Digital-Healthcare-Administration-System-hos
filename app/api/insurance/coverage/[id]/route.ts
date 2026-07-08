@@ -6,11 +6,12 @@ import { authOptions } from '@/lib/auth'
 // GET /api/insurance/coverage/[id] - Get a specific coverage rule
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const rule = await prisma.coverageRule.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         provider: true
       }
@@ -30,8 +31,9 @@ export async function GET(
 // PUT /api/insurance/coverage/[id] - Update a coverage rule (admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     
@@ -40,7 +42,7 @@ export async function PUT(
     }
 
     const rule = await prisma.coverageRule.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!rule) {
@@ -56,7 +58,7 @@ export async function PUT(
     const { serviceName, coveragePercent, maxAmount, isActive } = body
 
     const updatedRule = await prisma.coverageRule.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(serviceName && { serviceName }),
         ...(coveragePercent !== undefined && coveragePercent !== null && { coveragePercent: Number(coveragePercent) }),
@@ -81,8 +83,9 @@ export async function PUT(
 // DELETE /api/insurance/coverage/[id] - Delete a coverage rule (admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     
@@ -91,7 +94,7 @@ export async function DELETE(
     }
 
     const rule = await prisma.coverageRule.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!rule) {
@@ -99,7 +102,7 @@ export async function DELETE(
     }
 
     await prisma.coverageRule.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ message: 'Coverage rule deleted successfully' })

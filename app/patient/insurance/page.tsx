@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -22,7 +22,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
-export default function PatientInsuranceDashboard() {
+function PatientInsuranceDashboardContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -312,7 +312,7 @@ export default function PatientInsuranceDashboard() {
                 <Card className="dark:bg-gray-800 dark:border-gray-700">
                   <CardContent>
                     <div className="space-y-4">
-                      {claims.slice(0, 5).map((claim) => (
+                      {claims.slice(0,5).map((claim) => (
                         <div key={claim.id} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div>
                             <h3 className="font-medium dark:text-white">{claim.serviceName}</h3>
@@ -347,5 +347,13 @@ export default function PatientInsuranceDashboard() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function PatientInsuranceDashboard() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <PatientInsuranceDashboardContent />
+    </Suspense>
   )
 }

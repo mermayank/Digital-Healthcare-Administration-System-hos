@@ -3,14 +3,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import fs from 'fs'
 import path from 'path'
-import formidable from 'formidable'
-
-// Disable body parsing for formidable
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}
 
 export async function POST(request: NextRequest) {
   try {

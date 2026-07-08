@@ -6,8 +6,9 @@ import { authOptions } from '@/lib/auth'
 // GET /api/insurance/claims/[id] - Get a specific insurance claim
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     
@@ -16,7 +17,7 @@ export async function GET(
     }
 
     const claim = await prisma.insuranceClaim.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         card: {
           include: {
@@ -58,8 +59,9 @@ export async function GET(
 // PUT /api/insurance/claims/[id] - Update an insurance claim (process/approve/reject)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     
@@ -68,7 +70,7 @@ export async function PUT(
     }
 
     const claim = await prisma.insuranceClaim.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         card: true
       }
@@ -98,7 +100,7 @@ export async function PUT(
     }
 
     const updatedClaim = await prisma.insuranceClaim.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status,
         ...(parsedApprovedAmount !== undefined && { approvedAmount: parsedApprovedAmount }),

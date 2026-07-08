@@ -24,12 +24,12 @@ export async function POST(request: NextRequest) {
         email: 'patient@hospital.com',
         password: hashedPassword,
         role: 'PATIENT',
+        dateOfBirth: new Date('1990-01-01'),
+        gender: 'Male',
+        phone: '+1 (555) 123-4567',
+        address: '123 Main St, City, State',
         patient: {
           create: {
-            dateOfBirth: new Date('1990-01-01'),
-            gender: 'Male',
-            phone: '+1 (555) 123-4567',
-            address: '123 Main St, City, State',
             bloodGroup: 'O+'
           }
         }

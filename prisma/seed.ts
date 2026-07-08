@@ -6,35 +6,39 @@ async function seed() {
   try {
     console.log('Seeding database...');
     
-    // Create insurance providers
-    const providers = await prisma.insuranceProvider.createMany({
-      data: [
-        {
-          name: 'Ayushman Bharat',
-          description: 'Government health insurance scheme',
-          website: 'https://www.pmindia.gov.in/en/healthcare/',
-          phone: '1800-180-1104',
-          isActive: true
-        },
-        {
-          name: 'Star Health',
-          description: 'Private health insurance provider',
-          website: 'https://www.starhealth.in/',
-          phone: '1800-425-2255',
-          isActive: true
-        },
-        {
-          name: 'HDFC Ergo',
-          description: 'General insurance company',
-          website: 'https://www.hdfcergo.com/',
-          phone: '1800-222-222',
-          isActive: true
-        }
-      ],
-      skipDuplicates: true
-    });
+    // Check if providers already exist
+    const existingProviders = await prisma.insuranceProvider.findMany();
     
-    console.log(`Created ${providers.count} insurance providers`);
+    if (existingProviders.length === 0) {
+      const providers = await prisma.insuranceProvider.createMany({
+        data: [
+          {
+            name: 'Ayushman Bharat',
+            description: 'Government health insurance scheme',
+            website: 'https://www.pmindia.gov.in/en/healthcare/',
+            phone: '1800-180-1104',
+            isActive: true
+          },
+          {
+            name: 'Star Health',
+            description: 'Private health insurance provider',
+            website: 'https://www.starhealth.in/',
+            phone: '1800-425-2255',
+            isActive: true
+          },
+          {
+            name: 'HDFC Ergo',
+            description: 'General insurance company',
+            website: 'https://www.hdfcergo.com/',
+            phone: '1800-222-222',
+            isActive: true
+          }
+        ]
+      });
+      console.log(`Created ${providers.count} insurance providers`);
+    } else {
+      console.log('Insurance providers already exist');
+    }
     
     // Create sample users
     const adminUser = await prisma.user.upsert({
@@ -74,8 +78,9 @@ async function seed() {
     // Get providers
     const allProviders = await prisma.insuranceProvider.findMany();
     
-    // Create sample insurance cards
-    if (allProviders.length > 0) {
+    // Check if cards already exist
+    const existingCards = await prisma.insuranceCard.findMany();
+    if (allProviders.length > 0 && existingCards.length === 0) {
       const cards = await prisma.insuranceCard.createMany({
         data: [
           {
@@ -98,11 +103,12 @@ async function seed() {
             remainingBalance: 300000,
             status: 'PENDING'
           }
-        ],
-        skipDuplicates: true
+        ]
       });
       
       console.log(`Created ${cards.count} insurance cards`);
+    } else {
+      console.log('Insurance cards already exist');
     }
     
     console.log('Seeding completed successfully!');
