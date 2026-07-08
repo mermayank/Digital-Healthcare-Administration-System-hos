@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { signIn } from 'next-auth/react'
+import { useState, useEffect } from 'react'
+import { signIn, useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,11 +14,24 @@ export default function SignInPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const role = searchParams.get('role')
+  const { data: session, status } = useSession()
   
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // If user is already signed in, redirect to their dashboard
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user?.role) {
+      const roleRedirectMap: Record<string, string> = {
+        ADMIN: '/admin/dashboard',
+        DOCTOR: '/doctor/dashboard',
+        PATIENT: '/patient/dashboard'
+      }
+      router.push(roleRedirectMap[session.user.role as string] || '/')
+    }
+  }, [status, session, router])
 
   const getRoleIcon = () => {
     switch (role) {
@@ -61,18 +74,7 @@ export default function SignInPage() {
       if (result?.error) {
         setError('Invalid email or password')
       } else {
-        // Fetch user role from database
-        const response = await fetch('/api/auth/me')
-        const userData = await response.json()
-        
-        // Redirect based on actual user role from database
-        const roleRedirectMap: Record<string, string> = {
-          ADMIN: '/admin/dashboard',
-          DOCTOR: '/doctor/dashboard',
-          PATIENT: '/patient/dashboard'
-        }
-        
-        router.push(roleRedirectMap[userData.role] || '/')
+        // Session will be updated, useEffect will handle redirect
       }
     } catch (err) {
       setError('An error occurred. Please try again.')
