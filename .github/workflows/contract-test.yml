@@ -39,6 +39,9 @@ jobs:
       - name: Run database migrations
         run: npx prisma db push
 
+      - name: Seed database
+        run: npx prisma db seed
+
       - name: Start dev server in background
         run: npm run dev &
 
@@ -94,6 +97,9 @@ jobs:
 
       - name: Run database migrations
         run: npx prisma db push
+
+      - name: Seed database
+        run: npx prisma db seed
 
       - name: Start dev server in background
         run: npm run dev &

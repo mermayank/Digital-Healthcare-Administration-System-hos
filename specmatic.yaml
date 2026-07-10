@@ -1,0 +1,11 @@
+
+sources:
+  - provider: git
+    repository: https://github.com/znsio/specmatic-order-bff-contracts.git
+    branch: main
+  - provider: filesystem
+    paths:
+      - specs/insurance-openapi.yaml
+
+api:
+  timeoutInMilliseconds: 10000

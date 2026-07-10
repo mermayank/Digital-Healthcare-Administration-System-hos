@@ -25,11 +25,15 @@ paths:
                   timestamp:
                     type: string
                     format: date-time
+                  database:
+                    type: string
+                    example: "connected"
               examples:
                 healthy:
                   value:
                     status: "ok"
                     timestamp: "2024-01-01T00:00:00Z"
+                    database: "connected"
         "503":
           description: Service unavailable
           content:
@@ -43,6 +47,9 @@ paths:
                   timestamp:
                     type: string
                     format: date-time
+                  database:
+                    type: string
+                    example: "disconnected"
   /providers:
     get:
       summary: Get insurance providers
@@ -176,6 +183,9 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/InsuranceCard"
+              examples:
+                default:
+                  $ref: "#/components/examples/GetCardsSuccess"
         "401":
           description: Unauthorized
           content:
@@ -247,6 +257,9 @@ paths:
                     type: string
                   card:
                     $ref: "#/components/schemas/InsuranceCard"
+              examples:
+                success:
+                  $ref: "#/components/examples/CreateCardSuccess"
         "400":
           description: Bad Request
           content:
@@ -452,6 +465,9 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/CoverageRule"
+              examples:
+                default:
+                  $ref: "#/components/examples/GetCoverageSuccess"
         "400":
           description: Bad Request
           content:
@@ -487,6 +503,13 @@ paths:
                   type: number
                 maxAmount:
                   type: number
+            examples:
+              default:
+                value:
+                  providerId: "prov1"
+                  serviceName: "Doctor Consultation"
+                  coveragePercent: 80
+                  maxAmount: 1000
       responses:
         "201":
           description: Created
@@ -499,6 +522,9 @@ paths:
                     type: string
                   rule:
                     $ref: "#/components/schemas/CoverageRule"
+              examples:
+                success:
+                  $ref: "#/components/examples/CreateCoverageSuccess"
         "401":
           description: Unauthorized
           content:
@@ -669,6 +695,9 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/InsuranceClaim"
+              examples:
+                default:
+                  $ref: "#/components/examples/GetClaimsSuccess"
         "401":
           description: Unauthorized
           content:
@@ -710,6 +739,12 @@ paths:
                   type: string
                 claimedAmount:
                   type: number
+            examples:
+              default:
+                value:
+                  cardId: "card1"
+                  serviceName: "Doctor Consultation"
+                  claimedAmount: 500
       responses:
         "201":
           description: Created
@@ -722,6 +757,9 @@ paths:
                     type: string
                   claim:
                     $ref: "#/components/schemas/InsuranceClaim"
+              examples:
+                success:
+                  $ref: "#/components/examples/CreateClaimSuccess"
         "400":
           description: Bad Request
           content:
@@ -883,6 +921,107 @@ components:
           isActive: true
           createdAt: "2024-01-03T00:00:00Z"
           updatedAt: "2024-01-03T00:00:00Z"
+    GetCardsSuccess:
+      value:
+        cards:
+          - id: "card1"
+            patientId: "patient1"
+            providerId: "prov1"
+            cardNumber: "AB1234567890"
+            holderName: "John Doe"
+            policyNumber: "POL123456"
+            expiryDate: "2025-12-31T00:00:00Z"
+            coverageAmount: 500000
+            remainingBalance: 500000
+            documentUrl: "/uploads/card.jpg"
+            status: "APPROVED"
+            rejectionReason: null
+            verifiedById: null
+            verifiedAt: null
+            createdAt: "2024-01-01T00:00:00Z"
+            updatedAt: "2024-01-01T00:00:00Z"
+    CreateCardSuccess:
+      value:
+        message: "Insurance card submitted successfully"
+        card:
+          id: "card2"
+          patientId: "patient1"
+          providerId: "prov1"
+          cardNumber: "CD0987654321"
+          holderName: "Jane Smith"
+          policyNumber: "POL789012"
+          expiryDate: "2026-06-30T00:00:00Z"
+          coverageAmount: 750000
+          remainingBalance: 750000
+          documentUrl: "/uploads/card2.jpg"
+          status: "PENDING"
+          rejectionReason: null
+          verifiedById: null
+          verifiedAt: null
+          createdAt: "2024-01-05T00:00:00Z"
+          updatedAt: "2024-01-05T00:00:00Z"
+    GetCoverageSuccess:
+      value:
+        rules:
+          - id: "rule1"
+            providerId: "prov1"
+            serviceName: "Doctor Consultation"
+            coveragePercent: 80
+            maxAmount: 1000
+            isActive: true
+            createdAt: "2024-01-01T00:00:00Z"
+            updatedAt: "2024-01-01T00:00:00Z"
+          - id: "rule2"
+            providerId: "prov1"
+            serviceName: "Hospitalization"
+            coveragePercent: 90
+            maxAmount: 50000
+            isActive: true
+            createdAt: "2024-01-01T00:00:00Z"
+            updatedAt: "2024-01-01T00:00:00Z"
+    CreateCoverageSuccess:
+      value:
+        message: "Coverage rule created successfully"
+        rule:
+          id: "rule3"
+          providerId: "prov1"
+          serviceName: "Lab Tests"
+          coveragePercent: 70
+          maxAmount: 2000
+          isActive: true
+          createdAt: "2024-01-10T00:00:00Z"
+          updatedAt: "2024-01-10T00:00:00Z"
+    GetClaimsSuccess:
+      value:
+        claims:
+          - id: "claim1"
+            cardId: "card1"
+            appointmentId: null
+            serviceName: "Doctor Consultation"
+            claimedAmount: 500
+            approvedAmount: 400
+            status: "APPROVED"
+            rejectionReason: null
+            processedById: null
+            processedAt: null
+            createdAt: "2024-01-05T00:00:00Z"
+            updatedAt: "2024-01-05T00:00:00Z"
+    CreateClaimSuccess:
+      value:
+        message: "Insurance claim submitted successfully"
+        claim:
+          id: "claim2"
+          cardId: "card1"
+          appointmentId: null
+          serviceName: "Lab Tests"
+          claimedAmount: 1500
+          approvedAmount: null
+          status: "PENDING"
+          rejectionReason: null
+          processedById: null
+          processedAt: null
+          createdAt: "2024-01-15T00:00:00Z"
+          updatedAt: "2024-01-15T00:00:00Z"
   schemas:
     Error:
       type: object
