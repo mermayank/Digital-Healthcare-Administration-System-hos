@@ -30,9 +30,6 @@ jobs:
           java-version: "17"
           distribution: "temurin"
 
-      - name: Install Specmatic
-        run: npm install -g specmatic
-
       - name: Create .env file
         run: echo "DATABASE_URL=file:./dev.db" > .env
 
@@ -88,9 +85,6 @@ jobs:
         with:
           java-version: "17"
           distribution: "temurin"
-
-      - name: Install Specmatic
-        run: npm install -g specmatic
 
       - name: Create .env file
         run: echo "DATABASE_URL=file:./dev.db" > .env

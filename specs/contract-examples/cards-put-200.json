@@ -1,0 +1,1 @@
+{"http-request":{"method":"PUT","path":"/cards/card1","headers":{"Content-Type":"application/json"},"body":{"status":"APPROVED"}},"http-response":{"status":200,"body":{}}}

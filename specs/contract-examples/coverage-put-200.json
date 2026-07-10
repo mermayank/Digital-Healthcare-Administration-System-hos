@@ -1,0 +1,1 @@
+{"http-request":{"method":"PUT","path":"/coverage/rule1","headers":{"Content-Type":"application/json"},"body":{"coveragePercent":75}},"http-response":{"status":200,"body":{}}}

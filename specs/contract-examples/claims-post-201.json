@@ -1,0 +1,1 @@
+{"http-request":{"method":"POST","path":"/claims","headers":{"Content-Type":"application/json"},"body":{"cardId":"card1","serviceName":"Contract Claim","claimedAmount":100}},"http-response":{"status":201,"body":{}}}

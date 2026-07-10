@@ -1,0 +1,1 @@
+{"http-request":{"method":"POST","path":"/cards","headers":{"Content-Type":"application/json"},"body":{"providerId":"prov1","cardNumber":"CONTRACT-CARD-001","holderName":"Contract Test","coverageAmount":1000}},"http-response":{"status":201,"body":{}}}

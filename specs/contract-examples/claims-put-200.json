@@ -1,0 +1,1 @@
+{"http-request":{"method":"PUT","path":"/claims/claim1","headers":{"Content-Type":"application/json"},"body":{"status":"PROCESSED"}},"http-response":{"status":200,"body":{}}}

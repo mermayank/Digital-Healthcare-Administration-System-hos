@@ -1,0 +1,1 @@
+{"http-request":{"method":"POST","path":"/coverage","headers":{"Content-Type":"application/json"},"body":{"providerId":"prov1","serviceName":"Contract Coverage","coveragePercent":80}},"http-response":{"status":201,"body":{}}}

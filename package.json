@@ -10,8 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:contract": "specmatic test specs/insurance-openapi.yaml --testBaseURL=http://localhost:3000/api/insurance --examples=specs/examples",
-    "test:resiliency": "cross-env SPECMATIC_GENERATIVE_TESTS=true specmatic test specs/insurance-openapi.yaml --testBaseURL=http://localhost:3000/api/insurance --examples=specs/examples",
+    "test:contract": "specmatic test specs/insurance-openapi.yaml --testBaseURL=http://localhost:3000/api/insurance --timeout=30000 --examples=specs/contract-examples",
+    "test:resiliency": "cross-env SPECMATIC_GENERATIVE_TESTS=true specmatic test specs/insurance-openapi.yaml --testBaseURL=http://localhost:3000/api/insurance --examples=specs/contract-examples",
     "db:seed": "prisma db seed",
     "db:push": "prisma db push"
   },
@@ -54,6 +54,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.0.1",
     "prisma": "^6.19.3",
+    "specmatic": "2.49.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.0",
     "typescript": "^5"

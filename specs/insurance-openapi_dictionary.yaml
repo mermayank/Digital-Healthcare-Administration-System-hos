@@ -1,0 +1,6 @@
+PARAMETERS:
+  PATH:
+    id:
+      - card1
+      - rule1
+      - claim1
