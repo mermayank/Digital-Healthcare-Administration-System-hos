@@ -1,0 +1,8 @@
+{
+  "cardId": "card1",
+  "serviceDate": "2024-03-01",
+  "serviceProvider": "Dr. Johnson",
+  "serviceCost": 2000,
+  "claimAmount": 1600,
+  "documentUrl": "/uploads/claim2.jpg"
+}

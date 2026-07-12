@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Extract unique patients from appointments
-    const patients = appointments.map(appointment => appointment.patient)
+    const patients = appointments.map((appointment: { patient: typeof appointments[number]['patient'] }) => appointment.patient)
 
     return NextResponse.json({ patients })
   } catch (error) {

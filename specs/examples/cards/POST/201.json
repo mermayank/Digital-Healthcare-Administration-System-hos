@@ -1,0 +1,21 @@
+{
+  "message": "Insurance card submitted successfully",
+  "card": {
+    "id": "card2",
+    "patientId": "patient1",
+    "providerId": "prov1",
+    "cardNumber": "AB9876543210",
+    "holderName": "Jane Smith",
+    "policyNumber": "POL987654",
+    "expiryDate": "2026-06-30T00:00:00Z",
+    "coverageAmount": 750000,
+    "remainingBalance": 750000,
+    "documentUrl": "/uploads/card2.jpg",
+    "status": "PENDING",
+    "rejectionReason": null,
+    "verifiedById": null,
+    "verifiedAt": null,
+    "createdAt": "2024-01-05T00:00:00Z",
+    "updatedAt": "2024-01-05T00:00:00Z"
+  }
+}

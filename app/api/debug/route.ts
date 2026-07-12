@@ -25,8 +25,8 @@ export async function GET(request: NextRequest) {
       providers: providers.length,
       cards: cards.length,
       users: users.length,
-      providerList: providers.map(p => ({ id: p.id, name: p.name })),
-      cardList: cards.map(c => ({ 
+      providerList: providers.map((p: { id: string; name: string }) => ({ id: p.id, name: p.name })),
+      cardList: cards.map((c: { id: string; cardNumber: string; provider: { name: string }; patient?: { user?: { name: string | null } | null } }) => ({ 
         id: c.id, 
         cardNumber: c.cardNumber, 
         provider: c.provider.name, 

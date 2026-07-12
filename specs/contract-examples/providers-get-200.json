@@ -1,0 +1,1 @@
+{"http-request":{"method":"GET","path":"/providers"},"http-response":{"status":200,"body":{"providers":[{"id":"prov1","name":"Ayushman Bharat","description":"National health insurance scheme","website":"https://ayushmanbharat.gov.in","phone":"1800-102-7102","isActive":true,"createdAt":"2024-01-01T00:00:00.000Z","updatedAt":"2024-01-01T00:00:00.000Z"}]}}}

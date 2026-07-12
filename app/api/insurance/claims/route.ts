@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') as 'PENDING' | 'APPROVED' | 'REJECTED' | 'PROCESSED' | null
 
     // Validate status if provided
-    if (status && !['PENDING', 'APPROVED', 'REJECTED', 'PROCESSED'].includes(status)) {
+    if (status !== null && !['PENDING', 'APPROVED', 'REJECTED', 'PROCESSED'].includes(status)) {
       return NextResponse.json({ error: 'Invalid status parameter' }, { status: 400 })
     }
 
@@ -42,15 +42,15 @@ export async function POST(request: NextRequest) {
     const { cardId, appointmentId, serviceName, claimedAmount } = body
 
     // Validate required fields
-    if (!cardId || !serviceName || claimedAmount === undefined || claimedAmount === null) {
+    if (typeof cardId !== 'string' || typeof serviceName !== 'string' || typeof claimedAmount !== 'number' || !Number.isFinite(claimedAmount)) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Validate claimedAmount is a number
-    const parsedClaimedAmount = Number(claimedAmount)
-    if (isNaN(parsedClaimedAmount)) {
-      return NextResponse.json({ error: 'Invalid claimed amount' }, { status: 400 })
+    if (appointmentId !== undefined && typeof appointmentId !== 'string') {
+      return NextResponse.json({ error: 'Invalid field type' }, { status: 400 })
     }
+
+    const parsedClaimedAmount = claimedAmount
 
     // Validate card exists
     const card = await prisma.insuranceCard.findUnique({

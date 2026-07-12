@@ -1,0 +1,17 @@
+{
+  "claim": {
+    "id": "claim1",
+    "cardId": "card1",
+    "serviceDate": "2024-02-01T00:00:00Z",
+    "serviceProvider": "Dr. Smith",
+    "serviceCost": 1500,
+    "claimAmount": 1200,
+    "documentUrl": "/uploads/claim1.jpg",
+    "status": "APPROVED",
+    "rejectionReason": null,
+    "processedById": null,
+    "processedAt": null,
+    "createdAt": "2024-02-01T00:00:00Z",
+    "updatedAt": "2024-02-01T00:00:00Z"
+  }
+}

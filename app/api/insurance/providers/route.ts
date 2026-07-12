@@ -40,16 +40,22 @@ export async function POST(request: NextRequest) {
     const { name, description, website, phone } = body
 
     // Validate required fields
-    if (!name) {
+    if (typeof name !== 'string' || name.trim() === '') {
       return NextResponse.json({ error: 'Provider name is required' }, { status: 400 })
+    }
+
+    if ((description !== undefined && typeof description !== 'string') ||
+        (website !== undefined && typeof website !== 'string') ||
+        (phone !== undefined && typeof phone !== 'string')) {
+      return NextResponse.json({ error: 'Invalid field type' }, { status: 400 })
     }
 
     const provider = await prisma.insuranceProvider.create({
       data: {
         name,
-        description: description || null,
-        website: website || null,
-        phone: phone || null
+        description: description ?? null,
+        website: website ?? null,
+        phone: phone ?? null
       }
     })
 

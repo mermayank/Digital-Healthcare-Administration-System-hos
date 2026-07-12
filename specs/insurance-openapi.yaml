@@ -137,6 +137,12 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/InsuranceCard"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "500":
           description: Internal Server Error
           content:
@@ -566,6 +572,12 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/InsuranceClaim"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "500":
           description: Internal Server Error
           content:

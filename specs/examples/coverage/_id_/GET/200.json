@@ -1,0 +1,12 @@
+{
+  "rule": {
+    "id": "rule1",
+    "providerId": "prov1",
+    "serviceName": "General Consultation",
+    "coveragePercent": 80,
+    "maxAmount": 1000,
+    "isActive": true,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  }
+}

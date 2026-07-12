@@ -7,12 +7,12 @@ async function seed() {
     console.log('Seeding database...');
 
     // Delete existing test data in reverse order of dependencies
-    // await prisma.insuranceClaim.deleteMany();
-    // await prisma.insuranceCard.deleteMany();
-    // await prisma.coverageRule.deleteMany();
-    // await prisma.patient.deleteMany();
-    // await prisma.user.deleteMany();
-    // await prisma.insuranceProvider.deleteMany();
+    await prisma.insuranceClaim.deleteMany();
+    await prisma.insuranceCard.deleteMany();
+    await prisma.coverageRule.deleteMany();
+    await prisma.patient.deleteMany();
+    await prisma.user.deleteMany();
+    await prisma.insuranceProvider.deleteMany();
 
     // Create test data
     const existingProv1 = await prisma.insuranceProvider.findUnique({ where: { id: 'prov1' } });
@@ -140,6 +140,28 @@ async function seed() {
           rejectionReason: null,
           processedById: null,
           processedAt: null,
+          createdAt: new Date('2024-01-01T00:00:00Z'),
+          updatedAt: new Date('2024-01-01T00:00:00Z'),
+        },
+      });
+    }
+
+    // Ensure card1 exists for contract tests (always recreate to ensure correct state)
+    await prisma.insuranceCard.deleteMany({ where: { id: 'card1' } });
+    if (patient) {
+      await prisma.insuranceCard.create({
+        data: {
+          id: 'card1',
+          patientId: patient.id,
+          providerId: 'prov1',
+          cardNumber: 'AB1234567890',
+          holderName: 'John Doe',
+          policyNumber: 'POL123456',
+          expiryDate: new Date('2025-12-31T00:00:00Z'),
+          coverageAmount: 500000,
+          remainingBalance: 450000,
+          documentUrl: '/uploads/card1.jpg',
+          status: 'APPROVED',
           createdAt: new Date('2024-01-01T00:00:00Z'),
           updatedAt: new Date('2024-01-01T00:00:00Z'),
         },

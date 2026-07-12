@@ -1,0 +1,6 @@
+{
+  "providerId": "prov1",
+  "serviceName": "Lab Tests",
+  "coveragePercent": 70,
+  "maxAmount": 2000
+}

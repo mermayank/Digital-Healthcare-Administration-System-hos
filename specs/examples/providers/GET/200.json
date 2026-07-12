@@ -1,0 +1,24 @@
+{
+  "providers": [
+    {
+      "id": "prov1",
+      "name": "Ayushman Bharat",
+      "description": "National health insurance scheme",
+      "website": "https://ayushmanbharat.gov.in",
+      "phone": "1800-102-7102",
+      "isActive": true,
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "prov2",
+      "name": "Star Health",
+      "description": "Private health insurance provider",
+      "website": "https://starhealth.in",
+      "phone": "1800-425-2255",
+      "isActive": true,
+      "createdAt": "2024-01-02T00:00:00Z",
+      "updatedAt": "2024-01-02T00:00:00Z"
+    }
+  ]
+}

@@ -29,36 +29,57 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+
+  // Parse and validate request body
+  let body
   try {
-    const rule = await prisma.coverageRule.findUnique({
-      where: { id }
-    })
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
 
-    if (!rule) {
-      return NextResponse.json({ error: 'Coverage rule not found' }, { status: 404 })
-    }
+  const { serviceName, coveragePercent, maxAmount, isActive } = body
 
-    let body
-    try {
-      body = await request.json()
-    } catch {
-      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
-    }
-    const { serviceName, coveragePercent, maxAmount, isActive } = body
+  if (serviceName !== undefined && (serviceName === null || typeof serviceName !== 'string')) {
+    return NextResponse.json({ error: 'Invalid serviceName' }, { status: 400 })
+  }
 
+  if (coveragePercent !== undefined && (coveragePercent === null || typeof coveragePercent !== 'number' || !Number.isFinite(coveragePercent))) {
+    return NextResponse.json({ error: 'Invalid coveragePercent' }, { status: 400 })
+  }
+
+  if (maxAmount !== undefined && (maxAmount === null || typeof maxAmount !== 'number' || !Number.isFinite(maxAmount))) {
+    return NextResponse.json({ error: 'Invalid maxAmount' }, { status: 400 })
+  }
+
+  if (isActive !== undefined && (isActive === null || typeof isActive !== 'boolean')) {
+    return NextResponse.json({ error: 'Invalid isActive' }, { status: 400 })
+  }
+
+  // Check if rule exists
+  const rule = await prisma.coverageRule.findUnique({
+    where: { id }
+  })
+
+  if (!rule) {
+    return NextResponse.json({ error: 'Coverage rule not found' }, { status: 404 })
+  }
+
+  // Update rule in database
+  try {
     const updatedRule = await prisma.coverageRule.update({
       where: { id },
       data: {
-        ...(serviceName && { serviceName }),
-        ...(coveragePercent !== undefined && coveragePercent !== null && { coveragePercent: Number(coveragePercent) }),
-        ...(maxAmount !== undefined && { maxAmount: maxAmount !== null ? Number(maxAmount) : null }),
-        ...(isActive !== undefined && { isActive: isActive === 'true' || isActive === true })
+        ...(serviceName !== undefined && { serviceName }),
+        ...(coveragePercent !== undefined && { coveragePercent }),
+        ...(maxAmount !== undefined && { maxAmount }),
+        ...(isActive !== undefined && { isActive })
       }
     })
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: 'Coverage rule updated successfully',
-      rule: updatedRule 
+      rule: updatedRule
     })
   } catch (error) {
     console.error('Error updating coverage rule:', error)
@@ -73,15 +94,7 @@ export async function DELETE(
 ) {
   const { id } = await params
   try {
-    const rule = await prisma.coverageRule.findUnique({
-      where: { id }
-    })
-
-    if (!rule) {
-      return NextResponse.json({ error: 'Coverage rule not found' }, { status: 404 })
-    }
-
-    await prisma.coverageRule.delete({
+    await prisma.coverageRule.deleteMany({
       where: { id }
     })
 

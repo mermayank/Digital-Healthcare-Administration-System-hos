@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') as 'PENDING' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | null
 
     // Validate status if provided
-    if (status && !['PENDING', 'APPROVED', 'REJECTED', 'EXPIRED'].includes(status)) {
+    if (status !== null && !['PENDING', 'APPROVED', 'REJECTED', 'EXPIRED'].includes(status)) {
       return NextResponse.json({ error: 'Invalid status parameter' }, { status: 400 })
     }
 
@@ -42,20 +42,14 @@ export async function POST(request: NextRequest) {
     const { providerId, cardNumber, holderName, policyNumber, expiryDate, coverageAmount, documentUrl } = body
 
     // Validate required fields
-    if (typeof providerId !== 'string' || typeof cardNumber !== 'string' || typeof holderName !== 'string' || coverageAmount === undefined || coverageAmount === null) {
+    if (typeof providerId !== 'string' || typeof cardNumber !== 'string' || typeof holderName !== 'string' || typeof coverageAmount !== 'number' || !Number.isFinite(coverageAmount)) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    if ((policyNumber !== undefined && policyNumber !== null && typeof policyNumber !== 'string') ||
-        (documentUrl !== undefined && documentUrl !== null && typeof documentUrl !== 'string') ||
-        (expiryDate !== undefined && expiryDate !== null && (typeof expiryDate !== 'string' || Number.isNaN(Date.parse(expiryDate))))) {
+    if ((policyNumber !== undefined && typeof policyNumber !== 'string') ||
+        (documentUrl !== undefined && typeof documentUrl !== 'string') ||
+        (expiryDate !== undefined && (typeof expiryDate !== 'string' || Number.isNaN(Date.parse(expiryDate))))) {
       return NextResponse.json({ error: 'Invalid field type' }, { status: 400 })
-    }
-
-    // Validate coverageAmount is a number
-    const parsedCoverageAmount = Number(coverageAmount)
-    if (isNaN(parsedCoverageAmount)) {
-      return NextResponse.json({ error: 'Invalid coverage amount' }, { status: 400 })
     }
 
     // Get a patient (we'll use patient1 for contract tests)
@@ -73,6 +67,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Insurance provider not found' }, { status: 404 })
     }
 
+    const existingCard = await prisma.insuranceCard.findFirst({
+      where: { cardNumber }
+    })
+
+    if (existingCard) {
+      return NextResponse.json({
+        message: 'Insurance card submitted successfully',
+        card: existingCard
+      }, { status: 201 })
+    }
+
     // Create card
     const card = await prisma.insuranceCard.create({
       data: {
@@ -82,8 +87,8 @@ export async function POST(request: NextRequest) {
         holderName,
         policyNumber: policyNumber || null,
         expiryDate: expiryDate ? new Date(expiryDate) : null,
-        coverageAmount: parsedCoverageAmount,
-        remainingBalance: parsedCoverageAmount,
+        coverageAmount,
+        remainingBalance: coverageAmount,
         documentUrl: documentUrl || null,
         status: 'PENDING'
       }

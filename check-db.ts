@@ -23,7 +23,16 @@ async function checkDatabase() {
       }
     });
     console.log(`Insurance Cards: ${cards.length}`);
-    cards.forEach((c: any) => console.log(`  - ${c.cardNumber} (${c.provider.name}) for ${c.patient?.user?.name || 'Unknown'}`));
+    cards.forEach((c: any) => console.log(`  - ID: ${c.id}, CardNumber: ${c.cardNumber} (${c.provider.name}) for ${c.patient?.user?.name || 'Unknown'}`));
+    
+    // Check claims
+    const claims: any[] = await (prisma as any).insuranceClaim.findMany({
+      include: {
+        card: true
+      }
+    });
+    console.log(`Insurance Claims: ${claims.length}`);
+    claims.forEach((c: any) => console.log(`  - ID: ${c.id}, CardID: ${c.cardId}, Service: ${c.serviceName}`));
     
     // Check users
     const users = await prisma.user.findMany();

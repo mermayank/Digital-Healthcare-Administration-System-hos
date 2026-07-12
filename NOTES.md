@@ -14,12 +14,13 @@
 ### 3. Created OpenAPI 3.0 Contract
 - Located at `specs/insurance-openapi.yaml`
 - Covers all insurance endpoints with request/response schemas
-- Includes examples for Specmatic executable tests
+- Includes examples for Specmatic executable tests in `specs/contract-examples/`
 - Documents all possible status codes (200, 201, 400, 401, 403, 404, 500)
 
 ### 4. Set Up Specmatic
-- Added `test:contract` npm script
-- Created GitHub Actions workflow for continuous contract testing
+- Configuration in `specmatic.yaml` with `schemaResiliencyTests: all` and `actuatorUrl`
+- Single npm script: `npm run test:specmatic`
+- GitHub Actions runs one `specmatic-tests` job on push and pull request
 
 ### 5. Fixed Prisma Schema
 - Added missing opposite relation `insuranceClaims` on `Appointment` model to resolve schema validation error
@@ -32,6 +33,7 @@ This contract test setup would immediately catch issues like:
 - Incorrect filter logic (e.g., overwriting filters instead of combining)
 - Missing required fields in requests/responses
 - Unexpected status codes
+- Missing input validation for schema-invalid requests (schema resiliency tests)
 
 ## Example: How This Prevents Regressions
 
@@ -42,20 +44,15 @@ Suppose a future AI coding agent tries to "optimize" the insurance cards GET end
 
 This prevents integration surprises from making it to production.
 
-## Current Test Results
+## Running Specmatic Tests
 
-When running `npm run test:contract`, all 38 tests failed. This is expected because:
-1. **Authentication required**: All insurance endpoints (except GET /providers) are protected by NextAuth and require a valid session
-2. **No test data**: The database is empty, so requests for specific IDs (like /cards/123) return 404
-3. **No authenticated test setup**: The contract doesn't yet include security schemes or authenticated request examples
+1. Install dependencies: `npm install`
+2. Create `.env` with `DATABASE_URL="file:./dev.db"`
+3. Set up Prisma: `npm run db:push && npm run db:seed`
+4. Start dev server: `npm run dev`
+5. Run contract and resiliency tests: `npm run test:specmatic`
 
-## Next Steps for Working Contract Tests
-
-To get contract tests passing:
-1. Extend the OpenAPI contract with security schemes (e.g., `bearerAuth` or `cookieAuth`)
-2. Add test data seeding for users, patients, providers, cards, and claims
-3. Configure Specmatic to use authenticated sessions for protected endpoints
-4. Update examples in the contract with valid test IDs
+Configuration is read from `specmatic.yaml`. Examples are loaded from `specs/contract-examples/`. API coverage uses the actuator endpoint at `/api/actuator/mappings`.
 
 ## How to Run the Project
 
@@ -63,6 +60,6 @@ To set up and run the project:
 1. Install dependencies: `npm install`
 2. Create .env file with `DATABASE_URL="file:./dev.db"`
 3. Set up Prisma: `npx prisma generate && npx prisma db push`
-4. Start dev server: `npm run dev`
-5. (Optional) Run contract tests: `npm run test:contract` (will fail without auth/data setup as noted above)
-
+4. Seed test data: `npm run db:seed`
+5. Start dev server: `npm run dev`
+6. (Optional) Run Specmatic tests: `npm run test:specmatic`

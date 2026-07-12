@@ -1,0 +1,9 @@
+{
+  "providerId": "prov1",
+  "cardNumber": "AB9876543211",
+  "holderName": "Jane Smith",
+  "policyNumber": "POL987654",
+  "expiryDate": "2026-06-30",
+  "coverageAmount": 750000,
+  "documentUrl": "/uploads/card2.jpg"
+}

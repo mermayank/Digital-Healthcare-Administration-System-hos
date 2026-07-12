@@ -3,8 +3,9 @@ name: CI/CD
 on: [push, pull_request]
 
 jobs:
-  contract-tests:
+  specmatic-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -15,103 +16,46 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Set up Prisma
-        run: npx prisma generate
-
-      - name: Build Application
-        run: npm run build
-
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          java-version: "17"
-          distribution: "temurin"
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Create .env file
-        run: echo "DATABASE_URL=file:./dev.db" > .env
+        run: echo 'DATABASE_URL=file:./dev.db' > .env
 
-      - name: Run database migrations
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Apply database schema
         run: npx prisma db push
 
-      - name: Seed database
+      - name: Seed test data
         run: npx prisma db seed
 
-      - name: Start dev server in background
-        run: npm run dev &
+      - name: Build application
+        run: npm run build
 
-      - name: Wait for health check
+      - name: Start dev server in background
+        run: npm run dev -- --hostname 0.0.0.0 > /tmp/hms.log 2>&1 &
+
+      - name: Wait for service to start
         run: |
           for i in {1..30}; do
-            if curl -s http://localhost:3000/api/insurance/health; then
-              echo "Server is up!"
+            if curl -sSf http://127.0.0.1:3000/api/insurance/health > /dev/null; then
+              echo 'Server is up!'
               exit 0
             fi
             echo "Waiting for server... ($i/30)"
             sleep 2
           done
-          echo "Server failed to start!"
+          echo 'Server failed to start!'
+          cat /tmp/hms.log
           exit 1
 
-      - name: Run contract tests
-        run: npm run test:contract
-
-  resiliency-tests:
-    runs-on: ubuntu-latest
-    needs: contract-tests
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Set up Prisma
-        run: npx prisma generate
-
-      - name: Build Application
-        run: npm run build
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: "17"
-          distribution: "temurin"
-
-      - name: Create .env file
-        run: echo "DATABASE_URL=file:./dev.db" > .env
-
-      - name: Run database migrations
-        run: npx prisma db push
-
-      - name: Seed database
-        run: npx prisma db seed
-
-      - name: Start dev server in background
-        run: npm run dev &
-
-      - name: Wait for health check
-        run: |
-          for i in {1..30}; do
-            if curl -s http://localhost:3000/api/insurance/health; then
-              echo "Server is up!"
-              exit 0
-            fi
-            echo "Waiting for server... ($i/30)"
-            sleep 2
-          done
-          echo "Server failed to start!"
-          exit 1
-
-      - name: Run resiliency tests
-        run: npm run test:resiliency
-        env:
-          SPECMATIC_GENERATIVE_TESTS: "true"
+      - name: Run Specmatic tests
+        run: npm run test:specmatic

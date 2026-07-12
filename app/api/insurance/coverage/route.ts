@@ -42,15 +42,15 @@ export async function POST(request: NextRequest) {
     const { providerId, serviceName, coveragePercent, maxAmount } = body
 
     // Validate required fields
-    if (!providerId || !serviceName || coveragePercent === undefined || coveragePercent === null) {
+    if (typeof providerId !== 'string' || typeof serviceName !== 'string' || typeof coveragePercent !== 'number' || !Number.isFinite(coveragePercent)) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Validate coveragePercent is a number
-    const parsedCoveragePercent = Number(coveragePercent)
-    if (isNaN(parsedCoveragePercent)) {
-      return NextResponse.json({ error: 'Invalid coverage percent' }, { status: 400 })
+    if (maxAmount !== undefined && (typeof maxAmount !== 'number' || !Number.isFinite(maxAmount))) {
+      return NextResponse.json({ error: 'Invalid field type' }, { status: 400 })
     }
+
+    const parsedCoveragePercent = coveragePercent
 
     // Validate provider exists
     const provider = await prisma.insuranceProvider.findUnique({
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
         providerId,
         serviceName,
         coveragePercent: parsedCoveragePercent,
-        ...(maxAmount !== undefined && maxAmount !== null && { maxAmount: Number(maxAmount) })
+        ...(maxAmount !== undefined && { maxAmount })
       }
     })
 

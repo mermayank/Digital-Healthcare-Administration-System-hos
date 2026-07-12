@@ -34,35 +34,68 @@ export async function PUT(
 ) {
   const { id } = await params
 
+  // Parse and validate request body
+  let body
   try {
-    const card = await prisma.insuranceCard.findUnique({
-      where: { id }
-    })
+    body = await request.json()
+  } catch {
+    return NextResponse.json(
+      { error: 'Invalid JSON body' },
+      { status: 400 }
+    )
+  }
 
-    if (!card) {
-      return NextResponse.json(
-        { error: 'Insurance card not found' },
-        { status: 404 }
-      )
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+    return NextResponse.json(
+      { error: 'Invalid request body' },
+      { status: 400 }
+    )
+  }
+
+  const data: {
+    documentUrl?: string
+    status?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'EXPIRED'
+    rejectionReason?: string
+  } = {}
+
+  if ('documentUrl' in body) {
+    if (body.documentUrl === null || typeof body.documentUrl !== 'string') {
+      return NextResponse.json({ error: 'Invalid documentUrl' }, { status: 400 })
     }
+    data.documentUrl = body.documentUrl
+  }
 
-    let body
-    try {
-      body = await request.json()
-    } catch {
-      return NextResponse.json(
-        { error: 'Invalid JSON body' },
-        { status: 400 }
-      )
+  if ('status' in body) {
+    if (body.status === null || typeof body.status !== 'string' || !['PENDING', 'APPROVED', 'REJECTED', 'EXPIRED'].includes(body.status)) {
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     }
+    data.status = body.status
+  }
 
+  if ('rejectionReason' in body) {
+    if (body.rejectionReason === null || typeof body.rejectionReason !== 'string') {
+      return NextResponse.json({ error: 'Invalid rejectionReason' }, { status: 400 })
+    }
+    data.rejectionReason = body.rejectionReason
+  }
+
+  // Check if card exists
+  const card = await prisma.insuranceCard.findUnique({
+    where: { id }
+  })
+
+  if (!card) {
+    return NextResponse.json(
+      { error: 'Insurance card not found' },
+      { status: 404 }
+    )
+  }
+
+  // Update card in database
+  try {
     const updatedCard = await prisma.insuranceCard.update({
       where: { id },
-      data: {
-        ...(body.documentUrl && { documentUrl: body.documentUrl }),
-        ...(body.status && { status: body.status }),
-        ...(body.rejectionReason && { rejectionReason: body.rejectionReason })
-      }
+      data
     })
 
     return NextResponse.json({
@@ -86,18 +119,7 @@ export async function DELETE(
   const { id } = await params
 
   try {
-    const card = await prisma.insuranceCard.findUnique({
-      where: { id }
-    })
-
-    if (!card) {
-      return NextResponse.json(
-        { error: 'Insurance card not found' },
-        { status: 404 }
-      )
-    }
-
-    await prisma.insuranceCard.delete({
+    await prisma.insuranceCard.deleteMany({
       where: { id }
     })
 
