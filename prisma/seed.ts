@@ -147,6 +147,7 @@ async function seed() {
     }
 
     // Ensure card1 exists for contract tests (always recreate to ensure correct state)
+    await prisma.insuranceClaim.deleteMany({ where: { cardId: 'card1' } });
     await prisma.insuranceCard.deleteMany({ where: { id: 'card1' } });
     if (patient) {
       await prisma.insuranceCard.create({
@@ -167,6 +168,25 @@ async function seed() {
         },
       });
     }
+
+    // Recreate claim1 after card1 is recreated
+    await prisma.insuranceClaim.deleteMany({ where: { id: 'claim1' } });
+    await prisma.insuranceClaim.create({
+      data: {
+        id: 'claim1',
+        cardId: 'card1',
+        appointmentId: null,
+        serviceName: 'General Consultation',
+        claimedAmount: 500,
+        approvedAmount: null,
+        status: 'PENDING',
+        rejectionReason: null,
+        processedById: null,
+        processedAt: null,
+        createdAt: new Date('2024-01-01T00:00:00Z'),
+        updatedAt: new Date('2024-01-01T00:00:00Z'),
+      },
+    });
 
     console.log('Seeding completed successfully!');
   } catch (error) {

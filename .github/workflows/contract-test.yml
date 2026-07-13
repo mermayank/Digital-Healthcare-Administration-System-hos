@@ -57,5 +57,19 @@ jobs:
           cat /tmp/hms.log
           exit 1
 
+      - name: Wait for actuator endpoint
+        run: |
+          for i in {1..30}; do
+            if curl -sSf http://127.0.0.1:3000/api/actuator/mappings > /dev/null; then
+              echo 'Actuator endpoint is available!'
+              exit 0
+            fi
+            echo "Waiting for actuator endpoint... ($i/30)"
+            sleep 2
+          done
+          echo 'Actuator endpoint failed to start!'
+          cat /tmp/hms.log
+          exit 1
+
       - name: Run Specmatic tests
         run: npm run test:specmatic

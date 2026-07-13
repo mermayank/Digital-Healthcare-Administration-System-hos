@@ -48,7 +48,7 @@ export async function PUT(
     return NextResponse.json({ error: 'Invalid approved amount' }, { status: 400 })
   }
 
-  if (rejectionReason !== undefined && (rejectionReason === null || typeof rejectionReason !== 'string')) {
+  if (rejectionReason !== undefined && rejectionReason !== null && typeof rejectionReason !== 'string') {
     return NextResponse.json({ error: 'Invalid rejectionReason' }, { status: 400 })
   }
 
@@ -101,6 +101,7 @@ export async function PUT(
     })
   } catch (error) {
     console.error('Error updating insurance claim:', error)
+    console.error('Error details:', JSON.stringify(error, null, 2))
     return NextResponse.json({ error: 'Failed to update insurance claim' }, { status: 500 })
   }
 }

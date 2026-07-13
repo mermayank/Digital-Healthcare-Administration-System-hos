@@ -695,6 +695,7 @@ paths:
                   type: number
                 rejectionReason:
                   type: string
+                  nullable: true
       responses:
         "200":
           description: OK
