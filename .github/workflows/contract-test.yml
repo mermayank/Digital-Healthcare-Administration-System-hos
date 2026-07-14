@@ -73,3 +73,12 @@ jobs:
 
       - name: Run Specmatic tests
         run: npm run test:specmatic
+
+      - name: Upload Specmatic report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: specmatic-report
+          path: build/reports/specmatic
+          if-no-files-found: warn
+          retention-days: 30
