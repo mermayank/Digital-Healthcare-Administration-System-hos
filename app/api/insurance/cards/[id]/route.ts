@@ -17,7 +17,7 @@ export async function GET(
       return NextResponse.json({ error: 'Insurance card not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ card })
+    return NextResponse.json({})
   } catch (error) {
     console.error('Error fetching insurance card:', error)
     return NextResponse.json(
@@ -98,10 +98,7 @@ export async function PUT(
       data
     })
 
-    return NextResponse.json({
-      message: 'Insurance card updated successfully',
-      card: updatedCard
-    })
+    return NextResponse.json({})
   } catch (error) {
     console.error('Error updating insurance card:', error)
     return NextResponse.json(
@@ -123,9 +120,7 @@ export async function DELETE(
       where: { id }
     })
 
-    return NextResponse.json({
-      message: 'Insurance card deleted successfully'
-    })
+    return NextResponse.json({})
   } catch (error) {
     console.error('Error deleting insurance card:', error)
     return NextResponse.json(

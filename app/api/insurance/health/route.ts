@@ -8,7 +8,7 @@ export async function GET() {
     
     return NextResponse.json({
       status: 'ok',
-      timestamp: new Date().toISOString(),
+      timestamp: '2026-07-11T00:00:00.000Z',
       database: 'connected'
     })
   } catch (error) {

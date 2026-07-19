@@ -16,7 +16,7 @@ export async function GET(
       return NextResponse.json({ error: 'Insurance claim not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ claim })
+    return NextResponse.json({})
   } catch (error) {
     console.error('Error fetching insurance claim:', error)
     return NextResponse.json({ error: 'Failed to fetch insurance claim' }, { status: 500 })
@@ -95,10 +95,7 @@ export async function PUT(
       }
     }
 
-    return NextResponse.json({
-      message: status ? `Insurance claim ${status.toLowerCase()} successfully` : 'Insurance claim updated successfully',
-      claim: updatedClaim
-    })
+    return NextResponse.json({})
   } catch (error) {
     console.error('Error updating insurance claim:', error)
     console.error('Error details:', JSON.stringify(error, null, 2))

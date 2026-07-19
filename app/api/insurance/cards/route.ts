@@ -72,10 +72,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (existingCard) {
-      return NextResponse.json({
-        message: 'Insurance card submitted successfully',
-        card: existingCard
-      }, { status: 201 })
+      return NextResponse.json({}, { status: 201 })
     }
 
     // Create card

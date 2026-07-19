@@ -70,10 +70,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({ 
-      message: 'Coverage rule created successfully',
-      rule 
-    }, { status: 201 })
+    return NextResponse.json({}, { status: 201 })
   } catch (error) {
     console.error('Error creating coverage rule:', error)
     return NextResponse.json({ error: 'Failed to create coverage rule' }, { status: 500 })

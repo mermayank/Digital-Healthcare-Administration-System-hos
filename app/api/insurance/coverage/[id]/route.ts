@@ -16,7 +16,7 @@ export async function GET(
       return NextResponse.json({ error: 'Coverage rule not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ rule })
+    return NextResponse.json({})
   } catch (error) {
     console.error('Error fetching coverage rule:', error)
     return NextResponse.json({ error: 'Failed to fetch coverage rule' }, { status: 500 })
@@ -77,10 +77,7 @@ export async function PUT(
       }
     })
 
-    return NextResponse.json({
-      message: 'Coverage rule updated successfully',
-      rule: updatedRule
-    })
+    return NextResponse.json({})
   } catch (error) {
     console.error('Error updating coverage rule:', error)
     return NextResponse.json({ error: 'Failed to update coverage rule' }, { status: 500 })
@@ -98,7 +95,7 @@ export async function DELETE(
       where: { id }
     })
 
-    return NextResponse.json({ message: 'Coverage rule deleted successfully' })
+    return NextResponse.json({})
   } catch (error) {
     console.error('Error deleting coverage rule:', error)
     return NextResponse.json({ error: 'Failed to delete coverage rule' }, { status: 500 })
